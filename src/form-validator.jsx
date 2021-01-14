@@ -11,6 +11,15 @@ const myxss = new xss.FilterXSS({
     br: [],
     b: [],
     i: [],
+    a: [],
+    h1: [],
+    h2: [],
+    h3: [],
+    h4: [],
+    h5: [],
+    h6: [],
+    blockquote: [],
+    pre: [],
     ol: ['style'],
     ul: ['style'],
     li: [],
@@ -32,7 +41,7 @@ export default class FormValidator extends React.Component {
     };
   }
 
-  componentDidMount() {
+  componentWillMount() {
     this.subscription = this.props.emitter.addListener('formValidation', (errors) => {
       this.setState({ errors });
     });
@@ -55,13 +64,13 @@ export default class FormValidator extends React.Component {
         { this.state.errors.length > 0 &&
           <div className="alert alert-danger validation-error">
             <div className="clearfix">
-              <i className="fas fa-exclamation-triangle float-left"></i>
-              <ul className="float-left">
+              <i className="fa fa-exclamation-triangle pull-left"></i>
+              <ul className="pull-left">
                 {errors}
               </ul>
             </div>
             <div className="clearfix">
-              <a className="float-right btn btn-default btn-sm btn-danger" onClick={this.dismissModal.bind(this)}>Dismiss</a>
+              <a className="pull-right btn btn-default btn-sm btn-danger" onClick={this.dismissModal.bind(this)}>Dismiss</a>
             </div>
           </div>
         }

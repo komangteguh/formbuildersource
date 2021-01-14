@@ -2,15 +2,14 @@
   * <Form />
   */
 
+import { EventEmitter } from 'fbemitter';
+import FormElements from './form-elements';
+import FormValidator from './form-validator';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EventEmitter } from 'fbemitter';
-import FormValidator from './form-validator';
-import FormElements from './form-elements';
-import { TwoColumnRow, ThreeColumnRow } from './multi-column';
 
 const {
-  Image, Checkboxes, Signature, Download, Camera,
+  Image, Checkboxes, Signature, Download, Camera, Table
 } = FormElements;
 
 export default class ReactForm extends React.Component {
@@ -24,7 +23,6 @@ export default class ReactForm extends React.Component {
     super(props);
     this.answerData = this._convert(props.answer_data);
     this.emitter = new EventEmitter();
-    this.getDataById = this.getDataById.bind(this);
   }
 
   _convert(answers) {
@@ -34,12 +32,13 @@ export default class ReactForm extends React.Component {
         if (x.name.indexOf('tags_') > -1) {
           result[x.name] = x.value.map(y => y.value);
         } else {
+
           result[x.name] = x.value;
         }
       });
       return result;
     }
-    return answers || {};
+    return answers;
   }
 
   _getDefaultValue(item) {
@@ -73,11 +72,21 @@ export default class ReactForm extends React.Component {
     } else if (item.element === 'DatePicker') {
       $item.value = ref.state.value;
     } else if (item.element === 'Camera') {
-      $item.value = ref.state.img ? ref.state.img.replace('data:image/png;base64,', '') : '';
+      if (ref.state.img.length > 0) {
+        const imageList = ref.state.img.map(item => {
+          const imgUpdate = item.replace('data:image/png;base64,', '');
+          return imgUpdate;
+        });
+        $item.value = imageList;
+      } else {
+        $item.value = [];
+      }
     } else if (ref && ref.inputField) {
       $item = ReactDOM.findDOMNode(ref.inputField.current);
-      if (typeof $item.value === 'string') {
-        $item.value = $item.value.trim();
+      if ($item) {
+        if (typeof $item.value === 'string') {
+          $item.value = $item.value.trim();
+        }
       }
     }
     return $item;
@@ -152,7 +161,10 @@ export default class ReactForm extends React.Component {
       itemData.value = checked_options;
     } else {
       if (!ref) return null;
-      itemData.value = this._getItemValue(item, ref).value;
+      const itemVal = this._getItemValue(item, ref);
+      if (itemVal) {
+        itemData.value = itemVal.value;
+      }
     }
     return itemData;
   }
@@ -231,12 +243,12 @@ export default class ReactForm extends React.Component {
     return errors;
   }
 
-  getDataById(id) {
-    const { data } = this.props;
-    return data.find(x => x.id === id);
-  }
-
   getInputElement(item) {
+    if (item.element == 'DatePicker') {
+      if (item.value == undefined) {
+        item.value = null;
+      }
+    }
     const Input = FormElements[item.element];
     return (<Input
       handleChange={this.handleChange}
@@ -246,11 +258,6 @@ export default class ReactForm extends React.Component {
       data={item}
       read_only={this.props.read_only}
       defaultValue={this._getDefaultValue(item)} />);
-  }
-
-  getContainerElement(item, Element) {
-    const controls = item.childItems.map(x => (x ? this.getInputElement(this.getDataById(x)) : <div>&nbsp;</div>));
-    return (<Element mutable={true} key={`form_${item.id}`} data={item} controls={controls} />);
   }
 
   getSimpleElement(item) {
@@ -266,13 +273,12 @@ export default class ReactForm extends React.Component {
     }
 
     data_items.forEach((item) => {
-      if (item && item.readOnly && item.variableKey && this.props.variables[item.variableKey]) {
+      if (item.readOnly && item.variableKey && this.props.variables[item.variableKey]) {
         this.answerData[item.field_name] = this.props.variables[item.variableKey];
       }
     });
 
-    const items = data_items.filter(x => !x.parentId).map(item => {
-      if (!item) return null;
+    const items = data_items.map(item => {
       switch (item.element) {
         case 'TextInput':
         case 'NumberInput':
@@ -284,10 +290,6 @@ export default class ReactForm extends React.Component {
         case 'Tags':
         case 'Range':
           return this.getInputElement(item);
-        case 'ThreeColumnRow':
-          return this.getContainerElement(item, ThreeColumnRow);
-        case 'TwoColumnRow':
-          return this.getContainerElement(item, TwoColumnRow);
         case 'Signature':
           return <Signature ref={c => this.inputs[item.field_name] = c} read_only={this.props.read_only || item.readOnly} mutable={true} key={`form_${item.id}`} data={item} defaultValue={this._getDefaultValue(item)} />;
         case 'Checkboxes':
@@ -298,6 +300,8 @@ export default class ReactForm extends React.Component {
           return <Download download_path={this.props.download_path} mutable={true} key={`form_${item.id}`} data={item} />;
         case 'Camera':
           return <Camera ref={c => this.inputs[item.field_name] = c} read_only={this.props.read_only || item.readOnly} mutable={true} key={`form_${item.id}`} data={item} defaultValue={this._getDefaultValue(item)} />;
+        case 'Table':
+          return <Table ref={c => this.inputs[item.field_name] = c} read_only={true} mutable={true} key={`form_${item.id}`} data={item} defaultValue={this._getDefaultValue(item)} />;
         default:
           return this.getSimpleElement(item);
       }
@@ -311,7 +315,7 @@ export default class ReactForm extends React.Component {
     const backName = (this.props.back_name) ? this.props.back_name : 'Cancel';
 
     return (
-      <div>
+      <div className='form-container'>
         <FormValidator emitter={this.emitter} />
         <div className='react-form-builder-form'>
           <form encType='multipart/form-data' ref={c => this.form = c} action={this.props.form_action} onSubmit={this.handleSubmit.bind(this)} method={this.props.form_method}>
@@ -325,7 +329,7 @@ export default class ReactForm extends React.Component {
             {items}
             <div className='btn-toolbar'>
               {!this.props.hide_actions &&
-                <input type='submit' className='btn btn-school btn-big' value={actionName} />
+                <input type='submit' className='btn btn-school btn-big btn-agree' value={actionName} />
               }
               {!this.props.hide_actions && this.props.back_action &&
                 <a href={this.props.back_action} className='btn btn-default btn-cancel btn-big'>{backName}</a>

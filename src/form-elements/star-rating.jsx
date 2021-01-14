@@ -22,21 +22,15 @@ export default class StarRating extends React.Component {
   constructor(props) {
     super(props);
 
-    this.min = 0;
-    this.max = props.ratingAmount || 5;
-
-    const ratingVal = props.rating;
-    const ratingCache = {
-      pos: ratingVal ? this.getStarRatingPosition(ratingVal) : 0,
-      rating: props.rating,
-    };
-
     this.state = {
-      ratingCache,
-      editing: props.editing || !props.rating,
+      ratingCache: {
+        pos: 0,
+        rating: 0,
+      },
+      editing: props.editing || true,
       stars: 5,
-      rating: ratingCache.rating,
-      pos: ratingCache.pos,
+      rating: 0,
+      pos: 0,
       glyph: this.getStars(),
     };
   }
@@ -54,22 +48,22 @@ export default class StarRating extends React.Component {
     return stars;
   }
 
-  // componentWillMount() {
-  //   this.min = 0;
-  //   this.max = this.props.ratingAmount || 5;
-  //   if (this.props.rating) {
-  //     this.state.editing = this.props.editing || false;
-  //     const ratingVal = this.props.rating;
-  //     this.state.ratingCache.pos = this.getStarRatingPosition(ratingVal);
-  //     this.state.ratingCache.rating = ratingVal;
+  componentWillMount() {
+    this.min = 0;
+    this.max = this.props.ratingAmount || 5;
+    if (this.props.rating) {
+      this.state.editing = this.props.editing || false;
+      const ratingVal = this.props.rating;
+      this.state.ratingCache.pos = this.getStarRatingPosition(ratingVal);
+      this.state.ratingCache.rating = ratingVal;
 
-  //     this.setState({
-  //       ratingCache: this.state.ratingCache,
-  //       rating: ratingVal,
-  //       pos: this.getStarRatingPosition(ratingVal),
-  //     });
-  //   }
-  // }
+      this.setState({
+        ratingCache: this.state.ratingCache,
+        rating: ratingVal,
+        pos: this.getStarRatingPosition(ratingVal),
+      });
+    }
+  }
 
   componentDidMount() {
     this.root = ReactDOM.findDOMNode(this.rootNode);

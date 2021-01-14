@@ -6,10 +6,11 @@ const PLACE_HOLDER = 'form-place-holder';
 export default class PlaceHolder extends React.Component {
   render() {
     return (
-      this.props.show &&
-      <div className={PLACE_HOLDER} >
-        <div>{this.props.text}</div>
-      </div>
+      this.props.show && (
+        <div className={PLACE_HOLDER}>
+          <div>{this.props.text}</div>
+        </div>
+      )
     );
   }
 }
@@ -20,6 +21,6 @@ PlaceHolder.propTypes = {
 };
 
 PlaceHolder.defaultProps = {
-  text: 'Dropzone',
+  text: 'Drop an item here....',
   show: false,
 };

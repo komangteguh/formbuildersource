@@ -1,9 +1,9 @@
 /**
-  * <ReactFormBuilder />
-*/
+ * <ReactFormBuilder />
+ */
 
 import React from 'react';
-import { DndProvider } from 'react-dnd';
+import {DndProvider} from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import Preview from './preview';
 import Toolbar from './toolbar';
@@ -18,16 +18,15 @@ class ReactFormBuilder extends React.Component {
       editMode: false,
       editElement: null,
     };
-    this.editModeOn = this.editModeOn.bind(this);
   }
 
   editModeOn(data, e) {
     e.preventDefault();
     e.stopPropagation();
     if (this.state.editMode) {
-      this.setState({ editMode: !this.state.editMode, editElement: null });
+      this.setState({editMode: !this.state.editMode, editElement: null});
     } else {
-      this.setState({ editMode: !this.state.editMode, editElement: data });
+      this.setState({editMode: !this.state.editMode, editElement: data});
     }
   }
 
@@ -40,15 +39,21 @@ class ReactFormBuilder extends React.Component {
     }
   }
 
+  // cancelEditModeOff() {
+  //   this.setState({
+  //     editMode: false
+  //   });
+  // }
+
   render() {
-    const toolbarProps = {
-      showDescription: this.props.show_description,
-    };
-    if (this.props.toolbarItems) { toolbarProps.items = this.props.toolbarItems; }
+    const toolbarProps = {};
+    if (this.props.toolbarItems) {
+      toolbarProps.items = this.props.toolbarItems;
+    }
     return (
       <DndProvider backend={HTML5Backend}>
-       <div>
-         {/* <div>
+        <div>
+          {/* <div>
            <p>
              It is easy to implement a sortable interface with React DnD. Just make
              the same component both a drag source and a drop target, and reorder
@@ -56,24 +61,29 @@ class ReactFormBuilder extends React.Component {
            </p>
            <Container />
          </div> */}
-         <div className="react-form-builder clearfix">
-           <div>
-             <Preview files={this.props.files}
-                 manualEditModeOff={this.manualEditModeOff.bind(this)}
-                 showCorrectColumn={this.props.showCorrectColumn}
-                 parent={this}
-                 data={this.props.data}
-                 url={this.props.url}
-                 saveUrl={this.props.saveUrl}
-                 onLoad={this.props.onLoad}
-                 onPost={this.props.onPost}
-                 editModeOn={this.editModeOn}
-                 editMode={this.state.editMode}
-                 variables={this.props.variables}
-                 editElement={this.state.editElement} />
-             <Toolbar {...toolbarProps} />
-           </div>
-         </div>
+          <div className="react-form-builder clearfix">
+            <div>
+              <Preview
+                files={this.props.files}
+                manualEditModeOff={this.manualEditModeOff.bind(this)}
+                // cancelEditModeOff={this.cancelEditModeOff.bind(this)}
+                showCorrectColumn={this.props.showCorrectColumn}
+                parent={this}
+                data={this.props.data}
+                url={this.props.url}
+                saveUrl={this.props.saveUrl}
+                onLoad={this.props.onLoad}
+                onPost={this.props.onPost}
+                editModeOn={this.editModeOn}
+                editMode={this.state.editMode}
+                variables={this.props.variables}
+                editElement={this.state.editElement}
+                imageUpdated={this.props.imageUpdated}
+              />
+
+              <Toolbar {...toolbarProps} />
+            </div>
+          </div>
         </div>
       </DndProvider>
     );
@@ -87,4 +97,4 @@ FormBuilders.ElementStore = store;
 
 export default FormBuilders;
 
-export { ReactFormBuilder, ReactFormGenerator, store as ElementStore };
+export {ReactFormBuilder, ReactFormGenerator, store as ElementStore};
